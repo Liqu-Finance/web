@@ -7,7 +7,7 @@ interface PoolCardProps {
 
 export function PoolCard({ pool }: PoolCardProps) {
   return (
-    <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm">
+    <div className="bg-surface border border-border-main rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="flex items-center">

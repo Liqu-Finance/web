@@ -180,8 +180,8 @@ export function PoolList() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-text-main text-4xl font-bold mb-2">Top Pools Today</h2>
-        <p className="text-text-secondary">Top concentrated pools for you</p>
+        <h2 className="text-text-main text-4xl font-bold mb-2">Top CLMM Pools Today</h2>
+        <p className="text-text-secondary">Top CLMM Pools for you</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
