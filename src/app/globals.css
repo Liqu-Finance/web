@@ -3,24 +3,26 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-pink: #ec4899;
+  --brand-pink-hover: #db2777;
+  --surface: #ffffff;
+  --border: #fce7f3;
+  --text-secondary: #6b7280;
+  --background-light: #fef2f8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg-main: var(--background);
+  --color-bg-surface: var(--surface);
+  --color-text-main: var(--foreground);
+  --color-brand: var(--brand-pink);
+  --color-brand-hover: var(--brand-pink-hover);
+  --color-border-main: var(--border);
+  --color-text-secondary: var(--text-secondary);
+  --color-bg-light: var(--background-light);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
