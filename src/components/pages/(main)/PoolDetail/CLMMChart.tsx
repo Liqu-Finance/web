@@ -40,7 +40,7 @@ export function CLMMChart() {
         </p>
       </div>
 
-      <div className="relative pt-16 pb-8">
+      <div className="relative pt-16 pb-8 select-none">
         <div className="absolute top-0 left-0 w-full flex items-start justify-between mb-2">
           <div
             className="flex flex-col items-center"
@@ -57,16 +57,18 @@ export function CLMMChart() {
               className="w-7 h-7 bg-brand rounded flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing relative z-10"
               onMouseDown={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 const startX = e.clientX;
                 const startIndex = lowerRangeIndex;
-                const container = e.currentTarget.closest(".relative");
+                const container = document.querySelector(".relative.pt-16") as HTMLElement;
+
                 const handleMouseMove = (moveEvent: MouseEvent) => {
+                  moveEvent.preventDefault();
                   if (container) {
                     const rect = container.getBoundingClientRect();
                     const deltaX = moveEvent.clientX - startX;
-                    const deltaIndex = Math.round(
-                      (deltaX / rect.width) * mockBars.length
-                    );
+                    const barWidth = rect.width / mockBars.length;
+                    const deltaIndex = Math.round(deltaX / barWidth);
                     const newIndex = Math.max(
                       0,
                       Math.min(currentPriceIndex - 1, startIndex + deltaIndex)
@@ -77,7 +79,9 @@ export function CLMMChart() {
                 const handleMouseUp = () => {
                   document.removeEventListener("mousemove", handleMouseMove);
                   document.removeEventListener("mouseup", handleMouseUp);
+                  document.body.style.cursor = "";
                 };
+                document.body.style.cursor = "grabbing";
                 document.addEventListener("mousemove", handleMouseMove);
                 document.addEventListener("mouseup", handleMouseUp);
               }}
@@ -119,16 +123,18 @@ export function CLMMChart() {
               className="w-7 h-7 bg-brand rounded flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing relative z-10"
               onMouseDown={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 const startX = e.clientX;
                 const startIndex = upperRangeIndex;
-                const container = e.currentTarget.closest(".relative");
+                const container = document.querySelector(".relative.pt-16") as HTMLElement;
+
                 const handleMouseMove = (moveEvent: MouseEvent) => {
+                  moveEvent.preventDefault();
                   if (container) {
                     const rect = container.getBoundingClientRect();
                     const deltaX = moveEvent.clientX - startX;
-                    const deltaIndex = Math.round(
-                      (deltaX / rect.width) * mockBars.length
-                    );
+                    const barWidth = rect.width / mockBars.length;
+                    const deltaIndex = Math.round(deltaX / barWidth);
                     const newIndex = Math.max(
                       currentPriceIndex + 1,
                       Math.min(mockBars.length - 1, startIndex + deltaIndex)
@@ -139,7 +145,9 @@ export function CLMMChart() {
                 const handleMouseUp = () => {
                   document.removeEventListener("mousemove", handleMouseMove);
                   document.removeEventListener("mouseup", handleMouseUp);
+                  document.body.style.cursor = "";
                 };
+                document.body.style.cursor = "grabbing";
                 document.addEventListener("mousemove", handleMouseMove);
                 document.addEventListener("mouseup", handleMouseUp);
               }}
