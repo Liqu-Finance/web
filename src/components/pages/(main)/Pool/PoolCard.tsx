@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Pool } from "@/types";
 
 interface PoolCardProps {
@@ -7,7 +8,8 @@ interface PoolCardProps {
 
 export function PoolCard({ pool }: PoolCardProps) {
   return (
-    <div className="bg-surface border border-border-main rounded-2xl p-6">
+    <Link href={`/pool/${pool.id}`} className="block">
+      <div className="bg-surface border border-border-main rounded-2xl p-6 hover:border-brand/50 transition-colors cursor-pointer">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="flex items-center">
@@ -88,6 +90,7 @@ export function PoolCard({ pool }: PoolCardProps) {
         />
       </div>
     </div>
+    </Link>
   );
 }
 

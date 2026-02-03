@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { PoolCard } from "./PoolCard";
 import type { Pool } from "@/types";
 
@@ -180,8 +181,17 @@ export function PoolList() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-text-main text-4xl font-bold mb-2">Top CLMM Pools Today</h2>
-        <p className="text-text-secondary">Top CLMM Pools for you</p>
+        <div className="flex items-center gap-4 mb-2">
+          <Image
+            src="/Images/Logo/liqu.png"
+            alt="Liqu"
+            width={48}
+            height={48}
+            className="object-contain rounded-full"
+          />
+          <h2 className="text-text-main text-4xl font-bold">Top CLMM Pools Today</h2>
+        </div>
+        <p className="text-text-secondary ml-16">Top CLMM Pools for you</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
