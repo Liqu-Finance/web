@@ -42,7 +42,7 @@ export function PoolDetailHeader({ pool }: PoolDetailHeaderProps) {
               </div>
             </div>
             <div>
-              <h1 className="text-text-main text-2xl font-bold mb-0.5">
+              <h1 className="text-text-main text-2xl font-medium mb-0.5">
                 {pool.token0} / {pool.token1}
               </h1>
               <p className="text-text-secondary text-sm">
