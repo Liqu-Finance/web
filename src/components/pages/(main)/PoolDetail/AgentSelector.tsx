@@ -1,38 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { FaBriefcase, FaTrophy } from "react-icons/fa";
-import type { AIAgent } from "@/types";
+import Image from "next/image";
+import { FaTrophy, FaStar } from "react-icons/fa";
+import type { Agent } from "@/types";
 
-const mockAgents: AIAgent[] = [
-  {
-    id: "1",
-    name: "CLMM Agent",
-    agentId: "#22810",
-    score: 95,
-    feedback: 124,
-    stars: 89,
-  },
-  {
-    id: "2",
-    name: "Liquidity Optimizer",
-    agentId: "#22809",
-    score: 92,
-    feedback: 98,
-    stars: 76,
-  },
-  {
-    id: "3",
-    name: "Pool Analytics",
-    agentId: "#22808",
-    score: 88,
-    feedback: 67,
-    stars: 54,
-  },
-];
+interface AgentSelectorProps {
+  agents: Agent[];
+  selectedAgentId: string;
+  onSelectAgent: (agentId: string) => void;
+}
 
-export function AgentSelector() {
-  const [selectedAgent, setSelectedAgent] = useState<string>(mockAgents[0].id);
+export function AgentSelector({
+  agents,
+  selectedAgentId,
+  onSelectAgent,
+}: AgentSelectorProps) {
 
   return (
     <div className="bg-surface border border-border-main rounded-xl p-5 shadow-sm mb-4">
@@ -46,46 +28,71 @@ export function AgentSelector() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {mockAgents.map((agent) => {
-          const isSelected = selectedAgent === agent.id;
+        {agents.map((agent) => {
+          const isSelected = selectedAgentId === agent.id;
           return (
             <button
               key={agent.id}
-              onClick={() => setSelectedAgent(agent.id)}
-              className={`p-4 rounded-lg border-2 transition-all cursor-pointer text-left ${
+              onClick={() => onSelectAgent(agent.id)}
+              className={`p-3 rounded-lg border-2 transition-all cursor-pointer text-left ${
                 isSelected
                   ? "border-brand bg-brand/5"
                   : "border-border-main hover:border-brand/50"
               }`}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    isSelected ? "bg-brand" : "bg-bg-light"
-                  }`}
-                >
-                  <FaBriefcase
-                    className={`text-base ${
-                      isSelected ? "text-white" : "text-text-secondary"
-                    }`}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                  <Image
+                    src={agent.image}
+                    alt={agent.name}
+                    fill
+                    className="object-cover"
                   />
                 </div>
-                <div>
-                  <p className="text-text-main font-semibold text-sm">{agent.name}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-text-main font-semibold text-sm truncate">
+                      {agent.name}
+                    </p>
+                    <Image
+                      src={agent.chainLogo}
+                      alt={agent.chain}
+                      width={50}
+                      height={50}
+                      className="object-contain flex-shrink-0"
+                    />
+                  </div>
+                  <p className="text-brand text-xs font-medium truncate">
+                    {agent.ens}
+                  </p>
                   <p className="text-text-secondary text-xs">{agent.agentId}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-xs">
+
+              <div className="flex items-center gap-1 mb-2 flex-wrap">
+                {agent.services.map((service) => (
+                  <span
+                    key={service}
+                    className="bg-bg-light rounded px-1.5 py-0.5 text-xs text-text-secondary"
+                  >
+                    {service}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1">
                   <FaTrophy className="text-brand text-xs" />
                   <span className="text-text-main font-medium">
                     {agent.score}
                   </span>
                 </div>
-                <div className="text-text-secondary">
-                  {agent.feedback} feedback
+                <div className="flex items-center gap-1">
+                  <FaStar className="text-brand text-xs" />
+                  <span className="text-text-main font-medium">
+                    {agent.stars}
+                  </span>
                 </div>
-                <div className="text-text-secondary">{agent.stars} stars</div>
               </div>
             </button>
           );

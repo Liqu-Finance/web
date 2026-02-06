@@ -3,8 +3,7 @@ import { Navbar } from "@/components/pages/(main)/Pool";
 import {
   PoolDetailHeader,
   CLMMChart,
-  AgentSelector,
-  StrategyRecommendation,
+  AgentSelectionWrapper,
 } from "@/components/pages/(main)/PoolDetail";
 import { getPoolDetail, poolDetailsData } from "@/data/poolDetails";
 
@@ -36,8 +35,7 @@ export default async function PoolDetailPage({ params }: PoolDetailPageProps) {
         </div>
         <PoolDetailHeader pool={poolDetail} />
         <CLMMChart />
-        <AgentSelector />
-        <StrategyRecommendation />
+        <AgentSelectionWrapper />
       </div>
     </div>
   );
