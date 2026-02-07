@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaTrophy, FaStar } from "react-icons/fa";
+import { FaTrophy, FaStar, FaChartLine, FaShieldAlt, FaBolt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Agent } from "@/types";
 
@@ -135,23 +135,114 @@ export function StrategyRecommendation({
 
           <div className="flex-1">
             {!isAnalyzed && !isAnalyzing ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center max-w-md">
-                  <h3 className="text-text-main text-lg font-semibold mb-2">
-                    Ready to Analyze
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-6">
-                    Click the button below to let the AI agent analyze market
-                    conditions and recommend the optimal liquidity range for your
-                    position.
-                  </p>
-                  <button
-                    onClick={handleAnalyze}
-                    className="bg-brand hover:bg-brand-hover text-white py-3 px-8 rounded-full font-semibold text-sm transition-colors cursor-pointer"
-                  >
-                    Analyze Strategy
-                  </button>
+              <div className="flex flex-col h-full">
+                <div className="bg-white border border-border-main rounded-lg p-6 mb-3">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-text-secondary text-sm font-medium">
+                      Liquidity Distribution
+                    </span>
+                    <span className="text-text-main text-sm font-semibold">
+                      Current Price: $3,124.50
+                    </span>
+                  </div>
+
+                  <div className="relative h-63 mb-4">
+                    <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-text-secondary pr-2">
+                      <span>$3,500</span>
+                      <span>$3,300</span>
+                      <span>$3,100</span>
+                      <span>$2,900</span>
+                      <span>$2,700</span>
+                    </div>
+                    <div className="ml-12 h-full">
+                      <svg
+                        width="100%"
+                        height="100%"
+                        viewBox="0 0 400 192"
+                        preserveAspectRatio="none"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="areaGradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="0%"
+                            y2="100%"
+                          >
+                            <stop
+                              offset="0%"
+                              stopColor="#ec4899"
+                              stopOpacity="0.3"
+                            />
+                            <stop
+                              offset="100%"
+                              stopColor="#ec4899"
+                              stopOpacity="0.05"
+                            />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M 0 180 L 50 150 L 100 105 L 150 60 L 200 30 L 250 60 L 300 105 L 350 150 L 400 180 L 400 192 L 0 192 Z"
+                          fill="url(#areaGradient)"
+                          stroke="#ec4899"
+                          strokeWidth="2"
+                        />
+                        <line
+                          x1="200"
+                          y1="0"
+                          x2="200"
+                          y2="192"
+                          stroke="#6b7280"
+                          strokeWidth="2"
+                          strokeDasharray="6 6"
+                        />
+                        <circle
+                          cx="200"
+                          cy="30"
+                          r="4"
+                          fill="#6b7280"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between px-12">
+                    <div className="text-left">
+                      <p className="text-text-secondary text-xs mb-1">
+                        Lower Range
+                      </p>
+                      <p className="text-text-main text-sm font-semibold">
+                        ~$2,800
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-text-secondary text-xs mb-1">
+                        Current
+                      </p>
+                      <p className="text-brand text-sm font-semibold">
+                        $3,124.50
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-text-secondary text-xs mb-1">
+                        Upper Range
+                      </p>
+                      <p className="text-text-main text-sm font-semibold">
+                        ~$3,500
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
+                <button
+                  onClick={handleAnalyze}
+                  className="w-full bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm mb-2"
+                >
+                  Analyze Strategy
+                </button>
+                <p className="text-text-secondary text-xs text-center">
+                  AI will determine the optimal range based on market analysis
+                </p>
               </div>
             ) : isAnalyzing ? (
               <div className="flex flex-col gap-2">
