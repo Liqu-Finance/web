@@ -9,6 +9,7 @@ export interface Pool {
   volume24h: string;
   tvl: string;
   aprRange: string;
+  contractAddress?: string;
   liquidity: {
     range1: {
       amount: string;

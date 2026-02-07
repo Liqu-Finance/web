@@ -6,16 +6,17 @@ import type { Pool } from "@/types";
 
 const mockPools: Pool[] = [
   {
-    id: "eth-usdc",
+    id: "eth-usdt",
     token0: "Ethereum",
-    token1: "USD Coin",
+    token1: "USDT",
     token0Symbol: "ETH",
-    token1Symbol: "USDC",
+    token1Symbol: "USDT",
     token0Logo: "/Images/Logo/eth-logo.svg",
-    token1Logo: "/Images/Logo/usdc-logo.png",
+    token1Logo: "/Images/Logo/usdt-logo.png",
     volume24h: "$687.89K",
     tvl: "$723.13K",
     aprRange: "0.35% - 82.15%",
+    contractAddress: "https://unichain-sepolia.blockscout.com/address/0xC2de233c348c1631a7F75bb7A4A640bc411a0C70",
     liquidity: {
       range1: {
         amount: "$0",
@@ -40,7 +41,7 @@ const mockPools: Pool[] = [
     },
   },
   {
-    id: "eth-usdt",
+    id: "eth-usdt-2",
     token0: "Ethereum",
     token1: "Tether USD",
     token0Symbol: "ETH",

@@ -4,10 +4,12 @@ import { AgentList } from "@/components/pages/(main)/Agent";
 
 export default function AgentPage() {
   return (
-    <div className="min-h-screen w-full bg-white p-8">
+    <div className="min-h-screen w-full bg-white p-15">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center mb-12 relative">
-          <Navbar />
+        <div className="flex items-center justify-between mb-12 relative">
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <Navbar />
+          </div>
         </div>
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">

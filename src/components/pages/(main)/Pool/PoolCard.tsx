@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FiExternalLink } from "react-icons/fi";
 import type { Pool } from "@/types";
 
 interface PoolCardProps {
@@ -64,6 +65,18 @@ export function PoolCard({ pool }: PoolCardProps) {
         <div>
           <p className="text-text-secondary text-xs mb-1">APR Range</p>
           <p className="text-text-main font-semibold">{pool.aprRange}</p>
+          {pool.contractAddress && (
+            <a
+              href={pool.contractAddress}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 text-brand text-xs mt-1 hover:underline cursor-pointer"
+            >
+              <span>Contract</span>
+              <FiExternalLink className="w-3 h-3" />
+            </a>
+          )}
         </div>
       </div>
 

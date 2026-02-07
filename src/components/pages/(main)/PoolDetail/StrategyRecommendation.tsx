@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaTrophy, FaStar, FaChartLine, FaShieldAlt, FaBolt } from "react-icons/fa";
+import { FaTrophy, FaStar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Agent } from "@/types";
+import { useAnalyze } from "@/lib/hooks/useAnalyze";
+import { useRebalance } from "@/lib/hooks/useRebalance";
+import type { Agent, ApiAgent, AnalyzeResponse } from "@/types";
 
 interface StrategyRecommendationProps {
   selectedAgent: Agent;
+  selectedApiAgent: ApiAgent | null;
+  onStartDeposit: () => void;
+  depositId: bigint | null;
 }
 
 const analysisLogs = [
@@ -23,10 +28,16 @@ const analysisLogs = [
 
 export function StrategyRecommendation({
   selectedAgent,
+  selectedApiAgent,
+  onStartDeposit,
+  depositId,
 }: StrategyRecommendationProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [visibleLogs, setVisibleLogs] = useState<string[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeResponse | null>(null);
+
+  const { mutate: analyze } = useAnalyze();
+  const { mutate: rebalance, isPending: isRebalancePending, data: rebalanceData } = useRebalance();
 
   useEffect(() => {
     if (isAnalyzing) {
@@ -36,18 +47,40 @@ export function StrategyRecommendation({
           setVisibleLogs((prev) => [...prev, log]);
           if (index === analysisLogs.length - 1) {
             setTimeout(() => {
-              setIsAnalyzing(false);
-              setIsAnalyzed(true);
+              if (selectedApiAgent) {
+                analyze(
+                  { strategy: selectedApiAgent.strategy },
+                  {
+                    onSuccess: (data) => {
+                      setAnalysisResult(data);
+                      setIsAnalyzing(false);
+                    },
+                    onError: () => {
+                      setIsAnalyzing(false);
+                    },
+                  }
+                );
+              }
             }, 500);
           }
         }, index * 400);
       });
     }
-  }, [isAnalyzing]);
+  }, [isAnalyzing, selectedApiAgent, analyze]);
 
   const handleAnalyze = () => {
+    setAnalysisResult(null);
     setIsAnalyzing(true);
   };
+
+  const handleRebalance = () => {
+    if (depositId) {
+      rebalance(Number(depositId));
+    }
+  };
+
+  const isAnalyzed = !!analysisResult;
+  const hasDeposit = depositId !== null;
 
   return (
     <div className="bg-surface border border-border-main rounded-xl p-5 shadow-sm">
@@ -57,7 +90,7 @@ export function StrategyRecommendation({
         </h2>
         <p className="text-text-secondary text-sm">
           {isAnalyzed
-            ? "You classified as Balanced risk, here's our recommended CLMM strategy"
+            ? `Strategy: ${analysisResult?.strategy} - Confidence: ${analysisResult?.recommendation.confidence}%`
             : "Let AI analyze the optimal CLMM strategy for your liquidity position"}
         </p>
       </div>
@@ -146,7 +179,7 @@ export function StrategyRecommendation({
                     </span>
                   </div>
 
-                  <div className="relative h-63 mb-4">
+                  <div className="relative h-72 mb-4">
                     <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-text-secondary pr-2">
                       <span>$3,500</span>
                       <span>$3,300</span>
@@ -158,7 +191,7 @@ export function StrategyRecommendation({
                       <svg
                         width="100%"
                         height="100%"
-                        viewBox="0 0 400 192"
+                        viewBox="0 0 400 288"
                         preserveAspectRatio="none"
                       >
                         <defs>
@@ -182,7 +215,7 @@ export function StrategyRecommendation({
                           </linearGradient>
                         </defs>
                         <path
-                          d="M 0 180 L 50 150 L 100 105 L 150 60 L 200 30 L 250 60 L 300 105 L 350 150 L 400 180 L 400 192 L 0 192 Z"
+                          d="M 0 270 L 50 225 L 100 160 L 150 95 L 200 45 L 250 95 L 300 160 L 350 225 L 400 270 L 400 288 L 0 288 Z"
                           fill="url(#areaGradient)"
                           stroke="#ec4899"
                           strokeWidth="2"
@@ -191,17 +224,12 @@ export function StrategyRecommendation({
                           x1="200"
                           y1="0"
                           x2="200"
-                          y2="192"
+                          y2="288"
                           stroke="#6b7280"
                           strokeWidth="2"
                           strokeDasharray="6 6"
                         />
-                        <circle
-                          cx="200"
-                          cy="30"
-                          r="4"
-                          fill="#6b7280"
-                        />
+                        <circle cx="200" cy="45" r="5" fill="#6b7280" />
                       </svg>
                     </div>
                   </div>
@@ -216,9 +244,7 @@ export function StrategyRecommendation({
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-text-secondary text-xs mb-1">
-                        Current
-                      </p>
+                      <p className="text-text-secondary text-xs mb-1">Current</p>
                       <p className="text-brand text-sm font-semibold">
                         $3,124.50
                       </p>
@@ -234,14 +260,46 @@ export function StrategyRecommendation({
                   </div>
                 </div>
 
-                <button
-                  onClick={handleAnalyze}
-                  className="w-full bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm mb-2"
-                >
-                  Analyze Strategy
-                </button>
+                <div className="flex gap-3 mb-2">
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={!selectedApiAgent}
+                    className="flex-1 bg-white border border-brand text-brand py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm hover:bg-brand/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Preview Strategy
+                  </button>
+                  {hasDeposit ? (
+                    <button
+                      onClick={handleRebalance}
+                      disabled={isRebalancePending}
+                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRebalancePending ? "Rebalancing..." : "Rebalance Position"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onStartDeposit}
+                      disabled={!selectedApiAgent}
+                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Start Deposit
+                    </button>
+                  )}
+                </div>
+                {rebalanceData && (
+                  <div className="bg-white border border-brand/20 rounded-lg p-3 mb-2">
+                    <p className="text-text-main text-sm font-semibold mb-1">
+                      Rebalance Complete
+                    </p>
+                    <p className="text-text-secondary text-xs">
+                      New Position: #{rebalanceData.newPosition}
+                    </p>
+                  </div>
+                )}
                 <p className="text-text-secondary text-xs text-center">
-                  AI will determine the optimal range based on market analysis
+                  {hasDeposit
+                    ? "Preview strategy or rebalance your position"
+                    : "Preview strategy analysis or start creating your position"}
                 </p>
               </div>
             ) : isAnalyzing ? (
@@ -281,10 +339,10 @@ export function StrategyRecommendation({
                   className="mb-4"
                 >
                   <h3 className="text-text-main text-base font-semibold mb-1">
-                    Balanced Range Strategy
+                    {analysisResult?.strategy} Strategy
                   </h3>
                   <p className="text-text-secondary text-xs">
-                    AI-optimized liquidity range based on market analysis
+                    {analysisResult?.strategyConfig.description}
                   </p>
                 </motion.div>
 
@@ -296,26 +354,26 @@ export function StrategyRecommendation({
                 >
                   <div>
                     <p className="text-text-secondary text-xs mb-1">
-                      Lower Range
+                      Tick Lower
                     </p>
                     <p className="text-text-main text-base font-semibold">
-                      $2,845.20
+                      {analysisResult?.recommendation.tickLower}
                     </p>
                   </div>
                   <div>
                     <p className="text-text-secondary text-xs mb-1">
-                      Current Price
+                      Current Tick
                     </p>
                     <p className="text-text-main text-base font-semibold">
-                      $3,124.50
+                      {analysisResult?.pool.tick}
                     </p>
                   </div>
                   <div>
                     <p className="text-text-secondary text-xs mb-1">
-                      Upper Range
+                      Tick Upper
                     </p>
                     <p className="text-text-main text-base font-semibold">
-                      $3,450.80
+                      {analysisResult?.recommendation.tickUpper}
                     </p>
                   </div>
                 </motion.div>
@@ -328,24 +386,24 @@ export function StrategyRecommendation({
                 >
                   <div>
                     <p className="text-text-secondary text-xs mb-1">
-                      Estimated APY
+                      Confidence
                     </p>
-                    <p className="text-brand text-base font-semibold">24.5%</p>
-                  </div>
-                  <div>
-                    <p className="text-text-secondary text-xs mb-1">
-                      Estimated Fees
-                    </p>
-                    <p className="text-text-main text-base font-semibold">
-                      $125.80/day
+                    <p className="text-brand text-base font-semibold">
+                      {analysisResult?.recommendation.confidence}%
                     </p>
                   </div>
                   <div>
+                    <p className="text-text-secondary text-xs mb-1">Action</p>
+                    <p className="text-text-main text-base font-semibold">
+                      {analysisResult?.recommendation.action}
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-text-secondary text-xs mb-1">
-                      Risk Level
+                      Max Slippage
                     </p>
                     <p className="text-text-main text-base font-semibold">
-                      Balanced
+                      {(analysisResult?.strategyConfig.maxSlippage || 0) * 100}%
                     </p>
                   </div>
                 </motion.div>
@@ -360,35 +418,51 @@ export function StrategyRecommendation({
                     AI Analysis Summary
                   </h4>
                   <p className="text-text-secondary text-xs leading-relaxed">
-                    Based on recent market volatility and trading patterns, this
-                    range provides optimal balance between fee capture and
-                    impermanent loss risk. The agent has analyzed historical
-                    price movements over the past 30 days, identifying key
-                    support and resistance levels at $2,800 and $3,500
-                    respectively. Current market conditions suggest moderate
-                    volatility with a bullish trend, making this range ideal for
-                    maximizing fee generation while minimizing exposure to
-                    significant price swings. The agent predicts 85% in-range
-                    time over the next 7 days, with an estimated daily volume of
-                    $2.4M providing consistent fee opportunities. Risk assessment
-                    indicates low probability of extreme price movements beyond
-                    the specified range during this period. The recommended
-                    position size is optimized for gas efficiency and capital
-                    utilization, ensuring maximum returns while maintaining
-                    flexibility for market adjustments. Historical backtesting
-                    shows this strategy would have generated 28% APY over similar
-                    market conditions in the past quarter.
+                    {analysisResult?.recommendation.reason}
                   </p>
                 </motion.div>
 
-                <motion.button
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.5 }}
-                  className="w-full bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer"
+                  className="flex gap-3"
                 >
-                  Create Position
-                </motion.button>
+                  {hasDeposit ? (
+                    <button
+                      onClick={handleRebalance}
+                      disabled={isRebalancePending}
+                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRebalancePending ? "Rebalancing..." : "Rebalance Position"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onStartDeposit}
+                      disabled={!selectedApiAgent}
+                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Start Deposit
+                    </button>
+                  )}
+                </motion.div>
+                {rebalanceData && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-3 bg-white border border-brand/20 rounded-lg p-3"
+                  >
+                    <p className="text-text-main text-sm font-semibold mb-1">
+                      Rebalance Complete
+                    </p>
+                    <p className="text-text-secondary text-xs mb-1">
+                      New Position: #{rebalanceData.newPosition}
+                    </p>
+                    <p className="text-text-secondary text-xs">
+                      {rebalanceData.reason}
+                    </p>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </div>

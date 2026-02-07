@@ -51,9 +51,6 @@ export function PoolDetailHeader({ pool }: PoolDetailHeaderProps) {
             </div>
           </div>
         </div>
-        <button className="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer">
-          Manage my liquidity
-        </button>
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-5">
