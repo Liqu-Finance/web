@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { FaClock, FaWallet, FaRobot, FaCalendarAlt } from "react-icons/fa";
+import { FaClock, FaWallet, FaRobot, FaCalendarAlt, FaSyncAlt } from "react-icons/fa";
 import { useUserPositions } from "@/lib/hooks/useUserPositions";
+import { useRebalance } from "@/lib/hooks/useRebalance";
 import { formatUnits } from "viem";
 
 const STRATEGY_NAMES: Record<number, string> = {
@@ -52,7 +53,16 @@ function formatAmount(amount: bigint | undefined, decimals: number = 18): string
 }
 
 export function MyPositions() {
-  const { positions, isLoading } = useUserPositions();
+  const { positions, isLoading, refetch } = useUserPositions();
+  const { mutate: rebalance, isPending: isRebalancing, variables: rebalancingId } = useRebalance();
+
+  const handleRebalance = (depositId: bigint) => {
+    rebalance(Number(depositId), {
+      onSuccess: () => {
+        refetch();
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -203,14 +213,24 @@ export function MyPositions() {
                       {formatAddress(position.deposit.assignedAgent)}
                     </span>
                   </div>
-                  {position.deposit.positionTokenIds.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-text-secondary text-xs">NFT IDs:</span>
-                      <span className="text-brand text-xs font-semibold">
-                        {position.deposit.positionTokenIds.map((id) => `#${id.toString()}`).join(", ")}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {position.deposit.positionTokenIds.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-text-secondary text-xs">NFT IDs:</span>
+                        <span className="text-brand text-xs font-semibold">
+                          {position.deposit.positionTokenIds.map((id) => `#${id.toString()}`).join(", ")}
+                        </span>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => handleRebalance(position.depositId)}
+                      disabled={isRebalancing && rebalancingId === Number(position.depositId)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FaSyncAlt className={`text-xs ${isRebalancing && rebalancingId === Number(position.depositId) ? "animate-spin" : ""}`} />
+                      {isRebalancing && rebalancingId === Number(position.depositId) ? "Rebalancing..." : "Rebalance Position"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
