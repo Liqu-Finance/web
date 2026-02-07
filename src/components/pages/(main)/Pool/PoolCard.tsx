@@ -8,9 +8,8 @@ interface PoolCardProps {
 }
 
 export function PoolCard({ pool }: PoolCardProps) {
-  return (
-    <Link href={`/pool/${pool.id}`} className="block">
-      <div className="bg-surface border border-border-main rounded-2xl p-6 hover:border-brand/50 transition-colors cursor-pointer">
+  const content = (
+    <div className={`bg-surface border border-border-main rounded-2xl p-6 transition-colors relative ${pool.comingSoon ? "opacity-60 cursor-not-allowed" : "hover:border-brand/50 cursor-pointer"}`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="flex items-center">
@@ -105,6 +104,15 @@ export function PoolCard({ pool }: PoolCardProps) {
         />
       </div>
     </div>
+  );
+
+  if (pool.comingSoon) {
+    return content;
+  }
+
+  return (
+    <Link href={`/pool/${pool.id}`} className="block">
+      {content}
     </Link>
   );
 }

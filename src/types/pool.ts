@@ -10,6 +10,7 @@ export interface Pool {
   tvl: string;
   aprRange: string;
   contractAddress?: string;
+  comingSoon?: boolean;
   liquidity: {
     range1: {
       amount: string;

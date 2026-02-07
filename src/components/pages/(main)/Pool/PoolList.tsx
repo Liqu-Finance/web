@@ -51,6 +51,7 @@ const mockPools: Pool[] = [
     volume24h: "$532.51K",
     tvl: "$569.6K",
     aprRange: "0.21% - 53.50%",
+    comingSoon: true,
     liquidity: {
       range1: {
         amount: "$532.51K",
@@ -85,6 +86,7 @@ const mockPools: Pool[] = [
     volume24h: "$7.92",
     tvl: "$44.07",
     aprRange: "0.79%",
+    comingSoon: true,
     liquidity: {
       range1: {
         amount: "$7.92",
@@ -119,6 +121,7 @@ const mockPools: Pool[] = [
     volume24h: "$0.99",
     tvl: "$17.1",
     aprRange: "0.21%",
+    comingSoon: true,
     liquidity: {
       range1: {
         amount: "$0.99",
@@ -153,6 +156,7 @@ const mockPools: Pool[] = [
     volume24h: "$532.51K",
     tvl: "$569.6K",
     aprRange: "211.62%",
+    comingSoon: true,
     liquidity: {
       range1: {
         amount: "$0",
