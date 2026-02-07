@@ -66,16 +66,18 @@ export function PoolCard({ pool }: PoolCardProps) {
           <p className="text-text-secondary text-xs mb-1">APR Range</p>
           <p className="text-text-main font-semibold">{pool.aprRange}</p>
           {pool.contractAddress && (
-            <a
-              href={pool.contractAddress}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-brand text-xs mt-1 hover:underline cursor-pointer"
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(pool.contractAddress, "_blank", "noopener,noreferrer");
+              }}
+              className="inline-flex items-center gap-1 text-brand text-xs mt-1 hover:underline cursor-pointer bg-transparent border-none p-0"
             >
               <span>Contract</span>
               <FiExternalLink className="w-3 h-3" />
-            </a>
+            </button>
           )}
         </div>
       </div>
