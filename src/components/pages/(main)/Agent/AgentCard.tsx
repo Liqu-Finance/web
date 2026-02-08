@@ -54,10 +54,6 @@ export function AgentCard({ agent }: AgentCardProps) {
             <span className="text-text-main font-medium">{agent.score}</span>
           </div>
           <div className="flex items-center gap-1">
-            <FaComment className="text-text-secondary text-xs" />
-            <span className="text-text-main font-medium">{agent.feedback}</span>
-          </div>
-          <div className="flex items-center gap-1">
             <FaStar className="text-brand text-xs" />
             <span className="text-text-main font-medium">{agent.stars}</span>
           </div>
