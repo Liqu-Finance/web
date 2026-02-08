@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaTrophy, FaStar, FaTimes, FaCheck, FaExternalLinkAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,8 @@ interface AgentCardProps {
   agent: Agent;
 }
 
+const getStorageKey = (agentId: string) => `ens_claimed_${agentId}`;
+
 export function AgentCard({ agent }: AgentCardProps) {
   const { address, isConnected } = useAccount();
   const [showClaimModal, setShowClaimModal] = useState(false);
@@ -20,11 +22,22 @@ export function AgentCard({ agent }: AgentCardProps) {
 
   const { mutate: claimEns, isPending, isSuccess, reset: resetMutation } = useClaimEns();
 
+  useEffect(() => {
+    const stored = sessionStorage.getItem(getStorageKey(agent.id));
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setClaimedEns(parsed);
+      } catch {
+        sessionStorage.removeItem(getStorageKey(agent.id));
+      }
+    }
+  }, [agent.id]);
+
   const handleClaimClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     resetMutation();
     setShowClaimModal(true);
-    setClaimedEns(null);
     setCustomName("");
   };
 
@@ -39,7 +52,9 @@ export function AgentCard({ agent }: AgentCardProps) {
       },
       {
         onSuccess: (data) => {
-          setClaimedEns({ name: data.ensName, url: data.ensAppUrl });
+          const ensData = { name: data.ensName, url: data.ensAppUrl };
+          setClaimedEns(ensData);
+          sessionStorage.setItem(getStorageKey(agent.id), JSON.stringify(ensData));
         },
       }
     );
