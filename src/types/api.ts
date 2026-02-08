@@ -44,6 +44,12 @@ export interface DepositResult {
   depositId: number;
   status: string;
   message: string;
+  action?: string;
+  tickLower?: number;
+  tickUpper?: number;
+  newTokenId?: number;
+  txHash?: string;
+  reason?: string;
 }
 
 export interface AgentRunResponse {

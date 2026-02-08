@@ -6,8 +6,8 @@ import type { AgentRunResponse } from "@/types";
 
 const API_BASE_URL = "https://backend-agent-seven.vercel.app/api";
 
-async function runAgent(): Promise<AgentRunResponse> {
-  const response = await fetch(`${API_BASE_URL}/agent/run`, {
+async function runAgent(depositId: number): Promise<AgentRunResponse> {
+  const response = await fetch(`${API_BASE_URL}/agent/run/${depositId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

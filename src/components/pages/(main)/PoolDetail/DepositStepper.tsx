@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaCheck, FaSpinner, FaArrowLeft, FaTimes } from "react-icons/fa";
+import { FaCheck, FaSpinner, FaArrowLeft, FaTimes, FaExternalLinkAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAccount } from "wagmi";
 import { useDeposit } from "@/lib/hooks/useDeposit";
@@ -10,6 +10,8 @@ import { useAssignAgent, AGENT_ADDRESSES } from "@/lib/hooks/useAssignAgent";
 import { useAnalyze } from "@/lib/hooks/useAnalyze";
 import { useAgentRun } from "@/lib/hooks/useAgentRun";
 import type { ApiAgent, AnalyzeResponse } from "@/types";
+
+const EXPLORER_URL = "https://unichain-sepolia.blockscout.com/tx";
 
 interface DepositStepperProps {
   selectedApiAgent: ApiAgent | null;
@@ -66,7 +68,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
     { id: "deposit", title: "Deposit Tokens", subtitle: "Deposit to CLMM Agent contract", icon: "/Images/Logo/liqu.png", status: "pending" },
     { id: "assign", title: "Assign Agent", subtitle: `Assign ${strategyName} agent`, icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
     { id: "analyze", title: "AI Analyze", subtitle: "Calculate optimal range", icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
-    { id: "create", title: "Create Position", subtitle: "Mint CLMM position", icon: "/Images/Logo/liqu.png", status: "pending" },
+    { id: "create", title: "Agent Create Position", subtitle: "Agent Mint CLMM Position", icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
   ]);
 
   useEffect(() => {
@@ -102,14 +104,14 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   }, [isAssignSuccess, currentStep]);
 
   useEffect(() => {
-    if (!autoProgress || isPending || !isConnected || !address) return;
+    if (!autoProgress || isPending || !isConnected || !address || isRunSuccess) return;
 
     const shouldAutoProgress =
       (currentStep === 1 && isApproveUsdtSuccess) ||
       (currentStep === 2 && isApproveEthSuccess) ||
       (currentStep === 3 && isDepositSuccess) ||
       (currentStep === 4 && isAssignSuccess) ||
-      (currentStep === 5 && analysisResult);
+      (currentStep === 5 && analysisResult && !isRunSuccess);
 
     if (shouldAutoProgress) {
       const timer = setTimeout(() => {
@@ -117,7 +119,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, autoProgress, isPending, isApproveUsdtSuccess, isApproveEthSuccess, isDepositSuccess, isAssignSuccess, analysisResult, isConnected, address]);
+  }, [currentStep, autoProgress, isPending, isApproveUsdtSuccess, isApproveEthSuccess, isDepositSuccess, isAssignSuccess, analysisResult, isConnected, address, isRunSuccess]);
 
   useEffect(() => {
     if (isRunSuccess && currentStep === 5) {
@@ -171,7 +173,9 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
         }
         break;
       case 5:
-        runAgent(undefined);
+        if (depositId) {
+          runAgent(Number(depositId));
+        }
         break;
     }
   };
@@ -189,6 +193,9 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   const totalAmount = (parseFloat(amount0) || 0) + (parseFloat(amount1) || 0);
 
   if (showSuccessPopup) {
+    const depositResults = runData?.depositResults || [];
+    const txHashes = depositResults.filter((r) => r.txHash).map((r) => r.txHash as string);
+
     return (
       <AnimatePresence>
         <motion.div
@@ -215,9 +222,25 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
               <FaCheck className="text-brand text-3xl" />
             </motion.div>
             <h2 className="text-gray-900 text-2xl font-bold mb-2">Position Created</h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-gray-500 text-sm mb-4">
               {runData?.depositsProcessed || 1} deposit(s) processed successfully
             </p>
+            {txHashes.length > 0 && (
+              <div className="flex flex-col gap-2 mb-6">
+                {txHashes.map((txHash, index) => (
+                  <a
+                    key={txHash}
+                    href={`${EXPLORER_URL}/${txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 text-brand text-sm font-medium hover:underline cursor-pointer"
+                  >
+                    <span>View Transaction {txHashes.length > 1 ? `#${index + 1}` : ""}</span>
+                    <FaExternalLinkAlt className="text-xs" />
+                  </a>
+                ))}
+              </div>
+            )}
             <button
               onClick={handleSuccessClose}
               className="w-full py-3 rounded-full bg-brand text-white font-semibold text-sm hover:bg-brand-hover transition-colors cursor-pointer"
