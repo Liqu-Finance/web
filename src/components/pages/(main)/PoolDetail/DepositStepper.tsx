@@ -35,6 +35,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   const [amount1, setAmount1] = useState("100");
   const [activeTab, setActiveTab] = useState<"steps" | "info">("steps");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [autoProgress, setAutoProgress] = useState(false);
 
   const {
     approveUsdt,
@@ -50,6 +51,8 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   const { assignAgent, isPending: isAssignPending, isSuccess: isAssignSuccess } = useAssignAgent();
   const { mutate: analyze, isPending: isAnalyzePending } = useAnalyze();
   const { mutate: runAgent, isPending: isRunPending, isSuccess: isRunSuccess, data: runData } = useAgentRun();
+
+  const isPending = isDepositPending || isAssignPending || isAnalyzePending || isRunPending;
 
   const [steps, setSteps] = useState<Step[]>([
     { id: "approve-usdt", title: "Approve USDT", subtitle: "Allow contract to spend USDT", icon: "/Images/Logo/usdt-logo.png", status: "active" },
@@ -93,6 +96,24 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   }, [isAssignSuccess, currentStep]);
 
   useEffect(() => {
+    if (!autoProgress || isPending || !isConnected || !address) return;
+
+    const shouldAutoProgress =
+      (currentStep === 1 && isApproveUsdtSuccess) ||
+      (currentStep === 2 && isApproveEthSuccess) ||
+      (currentStep === 3 && isDepositSuccess) ||
+      (currentStep === 4 && isAssignSuccess) ||
+      (currentStep === 5 && analysisResult);
+
+    if (shouldAutoProgress) {
+      const timer = setTimeout(() => {
+        handleStepAction();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, autoProgress, isPending, isApproveUsdtSuccess, isApproveEthSuccess, isDepositSuccess, isAssignSuccess, analysisResult, isConnected, address]);
+
+  useEffect(() => {
     if (isRunSuccess && currentStep === 5) {
       updateStepStatus(5, "completed");
       setShowSuccessPopup(true);
@@ -107,6 +128,10 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
 
   const handleStepAction = async () => {
     if (!isConnected || !address) return;
+
+    if (currentStep === 0 && !autoProgress) {
+      setAutoProgress(true);
+    }
 
     switch (currentStep) {
       case 0:
@@ -153,7 +178,6 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
     onClose();
   };
 
-  const isPending = isDepositPending || isAssignPending || isAnalyzePending || isRunPending;
   const allCompleted = steps.every((s) => s.status === "completed");
 
   const totalAmount = (parseFloat(amount0) || 0) + (parseFloat(amount1) || 0);
@@ -368,14 +392,19 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
                         {step.subtitle}
                       </p>
                     </div>
-                    {step.status === "active" && (
+                    {step.status === "active" && !autoProgress && (
                       <button
                         onClick={handleStepAction}
                         disabled={isPending || !isConnected}
                         className="px-4 py-1.5 rounded-full bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                       >
-                        {isPending ? "..." : "Start"}
+                        {isPending ? "..." : currentStep === 0 ? "Start" : "Continue"}
                       </button>
+                    )}
+                    {step.status === "active" && autoProgress && (
+                      <div className="text-brand text-xs font-semibold flex-shrink-0">
+                        {isPending ? "Processing..." : "Starting..."}
+                      </div>
                     )}
                   </motion.div>
                 ))}

@@ -26,6 +26,10 @@ const analysisLogs = [
   "Generating strategy recommendation...",
 ];
 
+function capitalizeStrategy(strategy: string): string {
+  return strategy.charAt(0).toUpperCase() + strategy.slice(1).toLowerCase();
+}
+
 export function StrategyRecommendation({
   selectedAgent,
   selectedApiAgent,
@@ -90,7 +94,7 @@ export function StrategyRecommendation({
         </h2>
         <p className="text-text-secondary text-sm">
           {isAnalyzed
-            ? `Strategy: ${analysisResult?.strategy} - Confidence: ${analysisResult?.recommendation.confidence}%`
+            ? `Strategy: ${capitalizeStrategy(analysisResult?.strategy || "")} - Confidence: ${analysisResult?.recommendation.confidence}%`
             : "Let AI analyze the optimal CLMM strategy for your liquidity position"}
         </p>
       </div>
@@ -113,7 +117,14 @@ export function StrategyRecommendation({
                   <h3 className="text-text-main font-bold text-base">
                     {selectedAgent.name}
                   </h3>
-                  <div className="flex items-center gap-1">
+                </div>
+                <p className="text-brand text-sm font-medium mb-1">
+                  {selectedAgent.ens}
+                </p>
+                <p className="text-text-secondary text-sm mb-3">
+                  Agent {selectedAgent.agentId}
+                </p>
+                <div className="flex items-center mb-3 mt-2">
                     <Image
                       src={selectedAgent.chainLogo}
                       alt={selectedAgent.chain}
@@ -122,13 +133,6 @@ export function StrategyRecommendation({
                       className="object-contain"
                     />
                   </div>
-                </div>
-                <p className="text-brand text-sm font-medium mb-1">
-                  {selectedAgent.ens}
-                </p>
-                <p className="text-text-secondary text-sm mb-3">
-                  {selectedAgent.agentId}
-                </p>
 
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   {selectedAgent.services.map((service) => (
@@ -339,7 +343,7 @@ export function StrategyRecommendation({
                   className="mb-4"
                 >
                   <h3 className="text-text-main text-base font-semibold mb-1">
-                    {analysisResult?.strategy} Strategy
+                    {capitalizeStrategy(analysisResult?.strategy || "")} Strategy
                   </h3>
                   <p className="text-text-secondary text-xs">
                     {analysisResult?.strategyConfig.description}

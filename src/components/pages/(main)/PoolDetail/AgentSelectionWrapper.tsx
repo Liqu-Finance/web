@@ -20,17 +20,22 @@ const agentScores: Record<string, { score: number; stars: number }> = {
   DEGEN: { score: 88, stars: 54 },
 };
 
+function capitalizeStrategy(strategy: string): string {
+  return strategy.charAt(0).toUpperCase() + strategy.slice(1).toLowerCase();
+}
+
 function mapApiAgentToAgent(apiAgent: ApiAgent): Agent {
   const shortAddress = `${apiAgent.address.slice(0, 6)}...${apiAgent.address.slice(-4)}`;
+  const capitalizedStrategy = capitalizeStrategy(apiAgent.strategy);
   return {
     id: String(apiAgent.agentId),
-    name: `${apiAgent.strategy} Agent`,
+    name: `${capitalizedStrategy} Agent`,
     agentId: `#${apiAgent.agentId}`,
     image: agentImages[apiAgent.strategy] || agentImages.CONSERVATIVE,
     ens: apiAgent.domain,
     chain: "Unichain Sepolia",
     chainLogo: "/Images/Logo/unichain-logo.png",
-    services: [apiAgent.strategy, "CLMM"],
+    services: [capitalizedStrategy, "CLMM"],
     score: agentScores[apiAgent.strategy]?.score || 90,
     feedback: 0,
     stars: agentScores[apiAgent.strategy]?.stars || 70,

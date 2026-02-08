@@ -7,9 +7,9 @@ import { useRebalance } from "@/lib/hooks/useRebalance";
 import { formatUnits } from "viem";
 
 const STRATEGY_NAMES: Record<number, string> = {
-  0: "CONSERVATIVE",
-  1: "BALANCED",
-  2: "DEGEN",
+  0: "Conservative",
+  1: "Balanced",
+  2: "Degen",
 };
 
 const STATUS_NAMES: Record<number, string> = {
@@ -18,10 +18,22 @@ const STATUS_NAMES: Record<number, string> = {
   2: "Closed",
 };
 
+const AGENT_DOMAINS: Record<string, string> = {
+  "0x5b6A404F8958E7e10028301549e61435925725Bf": "conservative.liqu.finance",
+  "0x6c52aAD1Cbb66C0f666b62b36261d2f2205A8607": "balanced.liqu.finance",
+  "0x5B20B5a4Bba73bC6363fBE90E6b2Ab4fFF5C820e": "degen.liqu.finance",
+};
+
 function formatAddress(address: string): string {
   if (!address || address === "0x0000000000000000000000000000000000000000") {
     return "conservative.liqu.finance";
   }
+
+  const domain = AGENT_DOMAINS[address];
+  if (domain) {
+    return domain;
+  }
+
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
