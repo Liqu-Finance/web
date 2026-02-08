@@ -27,6 +27,10 @@ interface Step {
   status: StepStatus;
 }
 
+function capitalizeStrategy(strategy: string): string {
+  return strategy.charAt(0).toUpperCase() + strategy.slice(1).toLowerCase();
+}
+
 export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: DepositStepperProps) {
   const { address, isConnected } = useAccount();
   const [currentStep, setCurrentStep] = useState(0);
@@ -54,11 +58,13 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
 
   const isPending = isDepositPending || isAssignPending || isAnalyzePending || isRunPending;
 
+  const strategyName = selectedApiAgent?.strategy ? capitalizeStrategy(selectedApiAgent.strategy) : "AI";
+
   const [steps, setSteps] = useState<Step[]>([
     { id: "approve-usdt", title: "Approve USDT", subtitle: "Allow contract to spend USDT", icon: "/Images/Logo/usdt-logo.png", status: "active" },
     { id: "approve-eth", title: "Approve ETH", subtitle: "Allow contract to spend ETH", icon: "/Images/Logo/eth-logo.svg", status: "pending" },
     { id: "deposit", title: "Deposit Tokens", subtitle: "Deposit to CLMM Agent contract", icon: "/Images/Logo/liqu.png", status: "pending" },
-    { id: "assign", title: "Assign Agent", subtitle: `Assign ${selectedApiAgent?.strategy || "AI"} agent`, icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
+    { id: "assign", title: "Assign Agent", subtitle: `Assign ${strategyName} agent`, icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
     { id: "analyze", title: "AI Analyze", subtitle: "Calculate optimal range", icon: "/Images/Agent-Image/agent-image-1.png", status: "pending" },
     { id: "create", title: "Create Position", subtitle: "Mint CLMM position", icon: "/Images/Logo/liqu.png", status: "pending" },
   ]);
@@ -273,12 +279,12 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
               Deposit ${totalAmount.toLocaleString()}
             </h2>
             <p className="text-gray-500 text-sm">
-              Via {selectedApiAgent?.domain || "AI Agent"}
+             <span className="font-bold">Via</span> <span className="font-mono text-pink-400">{selectedApiAgent?.domain || "AI Agent"}</span>
             </p>
           </div>
 
           <div className="px-6 pb-4">
-            <div className="flex justify-center gap-2 mb-5">
+            {/* <div className="flex justify-center gap-2 mb-5">
               <button
                 onClick={() => setActiveTab("steps")}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
@@ -299,7 +305,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
               >
                 Position Info
               </button>
-            </div>
+            </div> */}
 
             {activeTab === "steps" && !allCompleted && (
               <div className="mb-5 grid grid-cols-2 gap-4">
