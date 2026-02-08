@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Liqu - Agentic Payment System",
+  title: "Liqu",
   description: "AI-powered payment system with Uniswap v4 CLMM pools",
 };
 
