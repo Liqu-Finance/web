@@ -272,23 +272,13 @@ export function StrategyRecommendation({
                   >
                     Preview Strategy
                   </button>
-                  {hasDeposit ? (
-                    <button
-                      onClick={handleRebalance}
-                      disabled={isRebalancePending}
-                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isRebalancePending ? "Rebalancing..." : "Rebalance Position"}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={onStartDeposit}
-                      disabled={!selectedApiAgent}
-                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Start Deposit
-                    </button>
-                  )}
+                  <button
+                    onClick={onStartDeposit}
+                    disabled={!selectedApiAgent}
+                    className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Start Deposit
+                  </button>
                 </div>
                 {rebalanceData && (
                   <div className="bg-white border border-brand/20 rounded-lg p-3 mb-2">
@@ -301,9 +291,7 @@ export function StrategyRecommendation({
                   </div>
                 )}
                 <p className="text-text-secondary text-xs text-center">
-                  {hasDeposit
-                    ? "Preview strategy or rebalance your position"
-                    : "Preview strategy analysis or start creating your position"}
+                  Preview strategy analysis or start creating your position
                 </p>
               </div>
             ) : isAnalyzing ? (
@@ -432,23 +420,13 @@ export function StrategyRecommendation({
                   transition={{ duration: 0.4, delay: 0.5 }}
                   className="flex gap-3"
                 >
-                  {hasDeposit ? (
-                    <button
-                      onClick={handleRebalance}
-                      disabled={isRebalancePending}
-                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isRebalancePending ? "Rebalancing..." : "Rebalance Position"}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={onStartDeposit}
-                      disabled={!selectedApiAgent}
-                      className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Start Deposit
-                    </button>
-                  )}
+                  <button
+                    onClick={onStartDeposit}
+                    disabled={!selectedApiAgent}
+                    className="flex-1 bg-brand hover:bg-brand-hover text-white py-3 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Start Deposit
+                  </button>
                 </motion.div>
                 {rebalanceData && (
                   <motion.div

@@ -40,25 +40,18 @@ export interface AnalyzeResponse {
   agentAddress: string;
 }
 
-export interface DepositResult {
-  depositId: number;
-  status: string;
-  message: string;
-  action?: string;
-  tickLower?: number;
-  tickUpper?: number;
-  newTokenId?: number;
-  txHash?: string;
-  reason?: string;
-}
-
 export interface AgentRunResponse {
   agentId: number;
   agentDomain: string;
   agentAddress: string;
+  depositId: number;
   pool: PoolInfo;
-  depositsProcessed: number;
-  depositResults: DepositResult[];
+  status: string;
+  action: string;
+  reason: string;
+  confidence: number;
+  txHashes: string[];
+  message: string;
   timestamp: number;
 }
 

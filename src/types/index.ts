@@ -8,7 +8,6 @@ export type {
   PoolInfo,
   Recommendation,
   AnalyzeResponse,
-  DepositResult,
   AgentRunResponse,
   UpdatedDeposit,
   RebalanceResponse,

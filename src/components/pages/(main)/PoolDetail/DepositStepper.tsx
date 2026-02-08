@@ -193,8 +193,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
   const totalAmount = (parseFloat(amount0) || 0) + (parseFloat(amount1) || 0);
 
   if (showSuccessPopup) {
-    const depositResults = runData?.depositResults || [];
-    const txHashes = depositResults.filter((r) => r.txHash).map((r) => r.txHash as string);
+    const txHashes = runData?.txHashes || [];
 
     return (
       <AnimatePresence>
@@ -223,7 +222,7 @@ export function DepositStepper({ selectedApiAgent, onClose, onSuccess }: Deposit
             </motion.div>
             <h2 className="text-gray-900 text-2xl font-bold mb-2">Position Created</h2>
             <p className="text-gray-500 text-sm mb-4">
-              {runData?.depositsProcessed || 1} deposit(s) processed successfully
+              {runData?.message || "Deposit processed successfully"}
             </p>
             {txHashes.length > 0 && (
               <div className="flex flex-col gap-2 mb-6">
