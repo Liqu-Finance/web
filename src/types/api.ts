@@ -62,6 +62,20 @@ export interface UpdatedDeposit {
   positionTokenIds: number[];
 }
 
+export interface CloseTransaction {
+  positionId: number;
+  txHash: string;
+}
+
+export interface RebalanceTransactions {
+  close: CloseTransaction[];
+  mint: {
+    positionId: number;
+    txHash: string;
+  };
+  validationHash: string;
+}
+
 export interface RebalanceResponse {
   depositId: number;
   strategy: string;
@@ -76,6 +90,7 @@ export interface RebalanceResponse {
     price: number;
   };
   updatedDeposit: UpdatedDeposit;
+  transactions?: RebalanceTransactions;
 }
 
 export interface UserDeposit {

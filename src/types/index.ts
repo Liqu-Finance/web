@@ -12,6 +12,8 @@ export type {
   AgentRunResponse,
   UpdatedDeposit,
   RebalanceResponse,
+  RebalanceTransactions,
+  CloseTransaction,
   UserDeposit,
   UserPosition,
 } from "./api";

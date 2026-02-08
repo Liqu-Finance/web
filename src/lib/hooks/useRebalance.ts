@@ -24,9 +24,6 @@ async function rebalance(depositId: number): Promise<RebalanceResponse> {
 export function useRebalance() {
   return useMutation({
     mutationFn: rebalance,
-    onSuccess: () => {
-      toast.success("Rebalance completed successfully");
-    },
     onError: (error) => {
       toast.error(error.message || "Failed to rebalance");
     },

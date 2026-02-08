@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { FaClock, FaWallet, FaRobot, FaCalendarAlt, FaSyncAlt, FaTimes } from "react-icons/fa";
+import { FaClock, FaWallet, FaRobot, FaCalendarAlt, FaSyncAlt, FaTimes, FaCheck, FaExternalLinkAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUserPositions } from "@/lib/hooks/useUserPositions";
 import { useRebalance } from "@/lib/hooks/useRebalance";
 import { formatUnits } from "viem";
-import type { UserPosition } from "@/types";
+import type { UserPosition, RebalanceResponse } from "@/types";
+
+const EXPLORER_URL = "https://unichain-sepolia.blockscout.com/tx";
 
 const STRATEGY_NAMES: Record<number, string> = {
   0: "Conservative",
@@ -75,9 +77,11 @@ const AGENT_IMAGES: Record<string, string> = {
 
 export function MyPositions() {
   const { positions, isLoading, refetch } = useUserPositions();
-  const { mutate: rebalance, isPending: isRebalancing, variables: rebalancingId } = useRebalance();
+  const { mutate: rebalance, isPending: isRebalancing } = useRebalance();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<UserPosition | null>(null);
+  const [rebalanceResult, setRebalanceResult] = useState<RebalanceResponse | null>(null);
 
   const handleRebalanceClick = (position: UserPosition) => {
     setSelectedPosition(position);
@@ -87,13 +91,20 @@ export function MyPositions() {
   const handleConfirmRebalance = () => {
     if (selectedPosition) {
       rebalance(Number(selectedPosition.depositId), {
-        onSuccess: () => {
+        onSuccess: (data) => {
           refetch();
           setShowConfirmModal(false);
-          setSelectedPosition(null);
+          setRebalanceResult(data);
+          setShowSuccessModal(true);
         },
       });
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setSelectedPosition(null);
+    setRebalanceResult(null);
   };
 
   const handleCancelRebalance = () => {
@@ -366,6 +377,149 @@ export function MyPositions() {
                     )}
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSuccessModal && rebalanceResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={handleCloseSuccessModal}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 className="text-gray-900 text-lg font-bold">Rebalance Successful</h3>
+                <button
+                  onClick={handleCloseSuccessModal}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <FaTimes className="text-gray-400 text-sm" />
+                </button>
+              </div>
+
+              <div className="px-6 py-6">
+                <div className="flex flex-col items-center mb-6">
+                  <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mb-4">
+                    <FaCheck className="text-brand text-3xl" />
+                  </div>
+                  <h4 className="text-gray-900 text-xl font-bold mb-1">Position Rebalanced</h4>
+                  <p className="text-gray-500 text-sm text-center">
+                    {rebalanceResult.reason}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">New Position ID</p>
+                      <p className="text-gray-900 text-sm font-semibold">
+                        #{rebalanceResult.newPosition}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">Action</p>
+                      <p className="text-gray-900 text-sm font-semibold capitalize">
+                        {rebalanceResult.action}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">New Tick Lower</p>
+                      <p className="text-gray-900 text-sm font-semibold">
+                        {rebalanceResult.newTickLower}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">New Tick Upper</p>
+                      <p className="text-gray-900 text-sm font-semibold">
+                        {rebalanceResult.newTickUpper}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {rebalanceResult.transactions && (
+                  <div className="space-y-3 mb-6">
+                    <p className="text-gray-700 text-sm font-semibold">View Transaction Hash</p>
+
+                    {rebalanceResult.transactions.close.length > 0 && (
+                      <div className="space-y-2">
+                        {rebalanceResult.transactions.close.map((tx, index) => (
+                          <a
+                            key={tx.txHash}
+                            href={`${EXPLORER_URL}/${tx.txHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+                          >
+                            <div>
+                              <p className="text-gray-500 text-xs">Close Position {tx.positionId}</p>
+                              <p className="text-gray-900 text-xs font-mono">
+                                {tx.txHash.slice(0, 10)}...{tx.txHash.slice(-8)}
+                              </p>
+                            </div>
+                            <FaExternalLinkAlt className="text-gray-400 text-xs group-hover:text-brand transition-colors" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {rebalanceResult.transactions.mint && (
+                      <a
+                        href={`${EXPLORER_URL}/${rebalanceResult.transactions.mint.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+                      >
+                        <div>
+                          <p className="text-gray-500 text-xs">Mint Position {rebalanceResult.transactions.mint.positionId}</p>
+                          <p className="text-gray-900 text-xs font-mono">
+                            {rebalanceResult.transactions.mint.txHash.slice(0, 10)}...{rebalanceResult.transactions.mint.txHash.slice(-8)}
+                          </p>
+                        </div>
+                        <FaExternalLinkAlt className="text-gray-400 text-xs group-hover:text-brand transition-colors" />
+                      </a>
+                    )}
+
+                    {rebalanceResult.transactions.validationHash && (
+                      <a
+                        href={`${EXPLORER_URL}/${rebalanceResult.transactions.validationHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-brand/5 border border-brand/20 rounded-lg hover:bg-brand/10 transition-colors cursor-pointer group"
+                      >
+                        <div>
+                          <p className="text-brand text-xs font-medium">Validation Transaction</p>
+                          <p className="text-gray-900 text-xs font-mono">
+                            {rebalanceResult.transactions.validationHash.slice(0, 10)}...{rebalanceResult.transactions.validationHash.slice(-8)}
+                          </p>
+                        </div>
+                        <FaExternalLinkAlt className="text-brand text-xs" />
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleCloseSuccessModal}
+                  className="w-full px-4 py-3 bg-brand hover:bg-brand-hover text-white rounded-full font-semibold text-sm transition-colors cursor-pointer"
+                >
+                  Done
+                </button>
               </div>
             </motion.div>
           </motion.div>
