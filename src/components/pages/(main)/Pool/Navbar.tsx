@@ -17,7 +17,7 @@ export function Navbar() {
     <nav className="flex items-center justify-between gap-2 bg-white border border-border-main rounded-full p-2 w-full shadow-sm">
       <div className="flex items-center gap-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href === "/pool" && pathname.startsWith("/pool/"));
           return (
             <Link
               key={item.href}

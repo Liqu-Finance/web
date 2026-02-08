@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { FaClock, FaWallet, FaRobot, FaCalendarAlt, FaSyncAlt } from "react-icons/fa";
+import { FaClock, FaWallet, FaRobot, FaCalendarAlt, FaSyncAlt, FaTimes } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import { useUserPositions } from "@/lib/hooks/useUserPositions";
 import { useRebalance } from "@/lib/hooks/useRebalance";
 import { formatUnits } from "viem";
+import type { UserPosition } from "@/types";
 
 const STRATEGY_NAMES: Record<number, string> = {
   0: "Conservative",
@@ -64,16 +67,38 @@ function formatAmount(amount: bigint | undefined, decimals: number = 18): string
   }
 }
 
+const AGENT_IMAGES: Record<string, string> = {
+  "0x5b6A404F8958E7e10028301549e61435925725Bf": "/Images/Agent-Image/agent-image-1.png",
+  "0x6c52aAD1Cbb66C0f666b62b36261d2f2205A8607": "/Images/Agent-Image/agent-image-2.png",
+  "0x5B20B5a4Bba73bC6363fBE90E6b2Ab4fFF5C820e": "/Images/Agent-Image/agent-image-3.png",
+};
+
 export function MyPositions() {
   const { positions, isLoading, refetch } = useUserPositions();
   const { mutate: rebalance, isPending: isRebalancing, variables: rebalancingId } = useRebalance();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<UserPosition | null>(null);
 
-  const handleRebalance = (depositId: bigint) => {
-    rebalance(Number(depositId), {
-      onSuccess: () => {
-        refetch();
-      },
-    });
+  const handleRebalanceClick = (position: UserPosition) => {
+    setSelectedPosition(position);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmRebalance = () => {
+    if (selectedPosition) {
+      rebalance(Number(selectedPosition.depositId), {
+        onSuccess: () => {
+          refetch();
+          setShowConfirmModal(false);
+          setSelectedPosition(null);
+        },
+      });
+    }
+  };
+
+  const handleCancelRebalance = () => {
+    setShowConfirmModal(false);
+    setSelectedPosition(null);
   };
 
   if (isLoading) {
@@ -226,21 +251,21 @@ export function MyPositions() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    {position.deposit.positionTokenIds.length > 0 && (
+                    {/* {position.deposit.positionTokenIds.length > 0 && (
                       <div className="flex items-center gap-1">
                         <span className="text-text-secondary text-xs">NFT IDs:</span>
                         <span className="text-brand text-xs font-semibold">
                           {position.deposit.positionTokenIds.map((id) => `#${id.toString()}`).join(", ")}
                         </span>
                       </div>
-                    )}
+                    )} */}
                     <button
-                      onClick={() => handleRebalance(position.depositId)}
-                      disabled={isRebalancing && rebalancingId === Number(position.depositId)}
+                      onClick={() => handleRebalanceClick(position)}
+                      disabled={isRebalancing}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <FaSyncAlt className={`text-xs ${isRebalancing && rebalancingId === Number(position.depositId) ? "animate-spin" : ""}`} />
-                      {isRebalancing && rebalancingId === Number(position.depositId) ? "Rebalancing..." : "Rebalance Position"}
+                      <FaSyncAlt className="text-xs" />
+                      Rebalance Position
                     </button>
                   </div>
                 </div>
@@ -249,6 +274,103 @@ export function MyPositions() {
           </div>
         ))}
       </div>
+
+      <AnimatePresence>
+        {showConfirmModal && selectedPosition && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={handleCancelRebalance}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 className="text-gray-900 text-lg font-bold">Confirm Rebalance</h3>
+                <button
+                  onClick={handleCancelRebalance}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <FaTimes className="text-gray-400 text-sm" />
+                </button>
+              </div>
+
+              <div className="px-6 py-6">
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-brand mb-4">
+                    <Image
+                      src={AGENT_IMAGES[selectedPosition.deposit.assignedAgent] || "/Images/Agent-Image/agent-image-1.png"}
+                      alt="Agent"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <h4 className="text-gray-900 text-xl font-bold mb-1">
+                    Position #{selectedPosition.depositId.toString()}
+                  </h4>
+                  <p className="text-brand text-sm font-medium">
+                    {formatAddress(selectedPosition.deposit.assignedAgent)}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">Strategy</p>
+                      <p className="text-gray-900 text-sm font-semibold">
+                        {STRATEGY_NAMES[selectedPosition.deposit.strategy]}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">Status</p>
+                      <p className="text-gray-900 text-sm font-semibold">
+                        {STATUS_NAMES[selectedPosition.deposit.status]}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-gray-600 text-xs leading-relaxed">
+                    This will rebalance your position to the optimal range based on current market conditions. Your funds will remain safe during the process.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelRebalance}
+                    disabled={isRebalancing}
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmRebalance}
+                    disabled={isRebalancing}
+                    className="flex-1 px-4 py-3 bg-brand hover:bg-brand-hover text-white rounded-full font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isRebalancing ? (
+                      <>
+                        <FaSyncAlt className="text-sm animate-spin" />
+                        Rebalancing...
+                      </>
+                    ) : (
+                      <>
+                        <FaSyncAlt className="text-sm" />
+                        Confirm Rebalance
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -13,4 +13,5 @@ export interface Agent {
   owner: string;
   x402: string | null;
   created: string;
+  comingSoon?: boolean;
 }

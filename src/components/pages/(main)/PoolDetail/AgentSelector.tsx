@@ -30,16 +30,27 @@ export function AgentSelector({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {agents.map((agent) => {
           const isSelected = selectedAgentId === agent.id;
+          const isDisabled = agent.comingSoon;
           return (
             <button
               key={agent.id}
-              onClick={() => onSelectAgent(agent.id)}
-              className={`p-3 rounded-lg border-2 transition-all cursor-pointer text-left ${
-                isSelected
-                  ? "border-brand bg-brand/5"
-                  : "border-border-main hover:border-brand/50"
+              onClick={() => !isDisabled && onSelectAgent(agent.id)}
+              disabled={isDisabled}
+              className={`p-3 rounded-lg border-2 transition-all text-left relative ${
+                isDisabled
+                  ? "opacity-60 cursor-not-allowed border-border-main"
+                  : isSelected
+                  ? "border-brand bg-brand/5 cursor-pointer"
+                  : "border-border-main hover:border-brand/50 cursor-pointer"
               }`}
             >
+              {isDisabled && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                  <div className="px-2 py-1 bg-brand/90 backdrop-blur-sm text-white text-xs font-bold rounded-full shadow-lg">
+                    Coming Soon
+                  </div>
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-2">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                   <Image

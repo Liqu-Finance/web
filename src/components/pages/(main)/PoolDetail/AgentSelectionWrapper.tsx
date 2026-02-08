@@ -27,6 +27,8 @@ function capitalizeStrategy(strategy: string): string {
 function mapApiAgentToAgent(apiAgent: ApiAgent): Agent {
   const shortAddress = `${apiAgent.address.slice(0, 6)}...${apiAgent.address.slice(-4)}`;
   const capitalizedStrategy = capitalizeStrategy(apiAgent.strategy);
+  const isComingSoon = apiAgent.strategy === "BALANCED" || apiAgent.strategy === "DEGEN";
+
   return {
     id: String(apiAgent.agentId),
     name: `${capitalizedStrategy} Agent`,
@@ -42,6 +44,7 @@ function mapApiAgentToAgent(apiAgent: ApiAgent): Agent {
     owner: shortAddress,
     x402: null,
     created: "Active",
+    comingSoon: isComingSoon,
   };
 }
 
